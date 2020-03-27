@@ -1411,14 +1411,21 @@ class Series(base.IndexOpsMixin, generic.NDFrame):
         |  1 | pig      |
         |  2 | dog      |
         |  3 | quetzal  |
+        >>> print(s.to_markdown(showindex=False))
+        |    | animal   |
+        |---:|:---------|
+        | elk      |
+        | pig      |
+        | dog      |
+        | quetzal  |
         """
     )
     @Substitution(klass="Series")
     @Appender(generic._shared_docs["to_markdown"])
     def to_markdown(
-        self, buf: Optional[IO[str]] = None, mode: Optional[str] = None, index = False, **kwargs
+        self, buf: Optional[IO[str]] = None, mode: Optional[str] = None, **kwargs
     ) -> Optional[str]:
-        return self.to_frame().to_markdown(buf, mode, index, **kwargs)
+        return self.to_frame().to_markdown(buf, mode, **kwargs)
 
     # ----------------------------------------------------------------------
 

@@ -2007,17 +2007,22 @@ class DataFrame(NDFrame):
         |---:|:-----------|:-----------|
         |  0 | elk        | dog        |
         |  1 | pig        | quetzal    |
+        >>> print(df.to_markdown(showindex=False))
+        | animal_1   | animal_2   |
+        |:-----------|:-----------|
+        | elk        | dog        |
+        | pig        | quetzal    |
         """
     )
     @Substitution(klass="DataFrame")
     @Appender(_shared_docs["to_markdown"])
     def to_markdown(
-        self, buf: Optional[IO[str]] = None, mode: Optional[str] = None, index = False, **kwargs
+        self, buf: Optional[IO[str]] = None, mode: Optional[str] = None, **kwargs
     ) -> Optional[str]:
         kwargs.setdefault("headers", "keys")
         kwargs.setdefault("tablefmt", "pipe")
         tabulate = import_optional_dependency("tabulate")
-        result = tabulate.tabulate(self, showindex = index, **kwargs)
+        result = tabulate.tabulate(self, **kwargs)
         if buf is None:
             return result
         buf, _, _, _ = get_filepath_or_buffer(buf, mode=mode)
