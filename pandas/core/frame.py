@@ -2012,12 +2012,12 @@ class DataFrame(NDFrame):
     @Substitution(klass="DataFrame")
     @Appender(_shared_docs["to_markdown"])
     def to_markdown(
-        self, buf: Optional[IO[str]] = None, mode: Optional[str] = None, **kwargs
+        self, buf: Optional[IO[str]] = None, mode: Optional[str] = None, index = False, **kwargs
     ) -> Optional[str]:
         kwargs.setdefault("headers", "keys")
         kwargs.setdefault("tablefmt", "pipe")
         tabulate = import_optional_dependency("tabulate")
-        result = tabulate.tabulate(self, **kwargs)
+        result = tabulate.tabulate(self, showindex = index, **kwargs)
         if buf is None:
             return result
         buf, _, _, _ = get_filepath_or_buffer(buf, mode=mode)
