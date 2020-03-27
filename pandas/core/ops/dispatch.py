@@ -17,6 +17,25 @@ from pandas.core.dtypes.generic import ABCExtensionArray, ABCSeries
 
 from pandas.core.construction import array
 
+ARITHMETIC_BINOPS = [
+    "add",
+    "sub",
+    "mul",
+    "pow",
+    "mod",
+    "floordiv",
+    "truediv",
+    "divmod",
+    "radd",
+    "rsub",
+    "rmul",
+    "rpow",
+    "rmod",
+    "rfloordiv",
+    "rtruediv",
+    "rdivmod",
+]
+
 
 def should_extension_dispatch(left: ABCSeries, right: Any) -> bool:
     """
@@ -66,6 +85,9 @@ def should_series_dispatch(left, right, op):
     if op.__name__.strip("_") in ["and", "or", "xor", "rand", "ror", "rxor"]:
         # TODO: GH references for what this fixes
         # Note: this check must come before the check for nonempty columns.
+        return True
+
+    if op.__name__.strip("_") in ARITHMETIC_BINOPS:
         return True
 
     if right.ndim == 1:
