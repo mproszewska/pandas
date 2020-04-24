@@ -34,6 +34,7 @@ def nested_to_record(
     sep: str = ".",
     level: int = 0,
     max_level: Optional[int] = None,
+    dtype=None,
 ):
     """
     A simplified json_normalize
@@ -50,9 +51,10 @@ def nested_to_record(
         e.g., for sep='.', { 'foo' : { 'bar' : 0 } } -> foo.bar
     level: int, optional, default: 0
         The number of levels in the json string.
-
     max_level: int, optional, default: None
         The max depth to normalize.
+    dtype : dict, default None
+        The dict of column to dtype.
 
         .. versionadded:: 0.25.0
 
@@ -97,11 +99,24 @@ def nested_to_record(
             ):
                 if level != 0:  # so we skip copying for top level, common case
                     v = new_d.pop(k)
-                    new_d[newkey] = v
+                    if dtype is None:
+                        new_d[newkey] = v
+                        continue
+                    try:
+                        dt = dtype[newkey]
+                    except KeyError:
+                        new_d[newkey] = v
+                        continue
+                    try:
+                        new_d[newkey] = dt(v)
+                    except:
+                        new_d[newkey] = v
                 continue
             else:
                 v = new_d.pop(k)
-                new_d.update(nested_to_record(v, newkey, sep, level + 1, max_level))
+                new_d.update(
+                    nested_to_record(v, newkey, sep, level + 1, max_level, dtype)
+                )
         new_ds.append(new_d)
 
     if singleton:
@@ -118,6 +133,7 @@ def _json_normalize(
     errors: str = "raise",
     sep: str = ".",
     max_level: Optional[int] = None,
+    dtype=None,
 ) -> "DataFrame":
     """
     Normalize semi-structured JSON data into a flat table.
@@ -150,6 +166,8 @@ def _json_normalize(
     max_level : int, default None
         Max number of levels(depth of dict) to normalize.
         if None, normalizes all levels.
+    dtype : dict, default None
+        The dict of column to dtype.
 
         .. versionadded:: 0.25.0
 
@@ -275,7 +293,7 @@ def _json_normalize(
             #
             # TODO: handle record value which are lists, at least error
             #       reasonably
-            data = nested_to_record(data, sep=sep, max_level=max_level)
+            data = nested_to_record(data, sep=sep, max_level=max_level, dtype=dtype)
         return DataFrame(data)
     elif not isinstance(record_path, list):
         record_path = [record_path]
@@ -308,7 +326,7 @@ def _json_normalize(
             for obj in data:
                 recs = _pull_records(obj, path[0])
                 recs = [
-                    nested_to_record(r, sep=sep, max_level=max_level)
+                    nested_to_record(r, sep=sep, max_level=max_level, dtype=dtype)
                     if isinstance(r, dict)
                     else r
                     for r in recs
