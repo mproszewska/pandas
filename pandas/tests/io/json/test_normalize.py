@@ -761,3 +761,16 @@ class TestNestedToRecord:
             }
         )
         tm.assert_frame_equal(result, expected)
+
+    def test_json_normalize_dtype(self):
+        data = [{"nest": {"int": 10, "float": 2.5, "str": "category_one"}}]
+        dtype = {"nest.int": np.int8, "nest.float": np.float32, "nest.str": "category"}
+        result = json_normalize(data, dtype=dtype)
+        expected = DataFrame(
+            {
+                "nest.int": Series([10], dtype=np.int8),
+                "nest.float": Series([2.5], dtype=np.float32),
+                "nest.str": Series(["category_one"], dtype="category"),
+            }
+        )
+        tm.assert_frame_equal(result, expected)
